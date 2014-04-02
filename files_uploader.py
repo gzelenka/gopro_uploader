@@ -12,6 +12,8 @@ pyrax.set_setting("region", "IAD")
 pyrax.set_credential_file("rack_auth")
 cf = pyrax.cloudfiles
 
+RAW_STASH = "NeedTranscode"
+
 
 def getopts():
     parser = OptionParser()
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     print o
     print a
 
-    cont = cf.create_container("NeedTranscode")
+    cont = cf.create_container(RAW_STASH)
     if(o.dir):
         c = 1
         for f in sorted(os.listdir(a[0])):
