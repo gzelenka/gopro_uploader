@@ -8,11 +8,11 @@ from optparse import OptionParser
 
 
 pyrax.set_setting("identity_type", "rackspace")
-pyrax.set_setting("region", "IAD")
+pyrax.set_setting("region", "DFW")
 pyrax.set_credential_file("rack_auth")
 cf = pyrax.cloudfiles
 
-RAW_STASH = "NeedTranscode"
+RAW_STASH = "MailChannelsTrexDumps"
 
 
 def getopts():
@@ -37,24 +37,18 @@ if __name__ == '__main__':
     print a
 
     cont = cf.create_container(RAW_STASH)
+    contents = cont.get_object_names()
     if(o.dir):
-        c = 1
         for f in sorted(os.listdir(a[0])):
-            ext = f.split('.')[-1]
-            n = "Jam%d.%s" % (c, ext)
-            src = os.path.join(a[0], f)
-            print "Uploading %s/%s as %s..." % (a[0], f, n)
-            meta = {'finished_container_name': o.name,
-                   }
-            cf.upload_file(cont, src, obj_name=n,
-                                  content_type="video/H264")
-            obj = cont.get_object(n)
-            if get_md5(src) != obj.etag:
-                print "UPLOAD MD5 MISMATCH!!"
-            else:
-                print "md5 verified"
+            if f not in contents:
+                src = os.path.join(a[0], f)
+                #print "Uploading %s/%s..." % (a[0], f)
+                cf.upload_file(cont, src)
+                obj = cont.get_object(f)
+                if get_md5(src) != obj.etag:
+                    print "UPLOAD MD5 MISMATCH!! %s" % f
+                else:
+                    print "%s/%s" % (cont.cdn_uri, f)
 
-            obj.set_metadata(meta)
-            c += 1
 #    else:
 #        cf.upload_file(cont, a[0], obj_name="FOOBAR")
